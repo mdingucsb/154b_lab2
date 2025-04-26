@@ -125,7 +125,7 @@ module ucsbece154b_controller (
 
 
 // ****** EXECUTE STAGE ****************************************
- reg RegWriteE, MemWriteE, BranchE_o;
+ reg RegWriteE, MemWriteE;
  reg BranchTypeE;
  reg [1:0] ResultSrcE;
 
