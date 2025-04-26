@@ -31,7 +31,8 @@ module ucsbece154b_controller (
     output reg    [1:0] ResultSrcW_o, 
     output reg    [1:0] ResultSrcM_o,
     output wire PHTincrement_o,
-    output reg JumpE_o
+    output reg JumpE_o,
+    output reg BranchE_o
 );
 
  `include "ucsbece154b_defines.vh"
@@ -124,11 +125,11 @@ module ucsbece154b_controller (
 
 
 // ****** EXECUTE STAGE ****************************************
- reg RegWriteE, MemWriteE, BranchE;
+ reg RegWriteE, MemWriteE, BranchE_o;
  reg BranchTypeE;
  reg [1:0] ResultSrcE;
 
- assign PHTincrement_o = BranchE & (ZeroE_i ^ BranchTypeE); // basically if Branch AND is taken
+ assign PHTincrement_o = BranchE_o & (ZeroE_i ^ BranchTypeE); // basically if Branch AND is taken
 //  assign PCSrcE_o = BranchE & (PHTincrement_o) | JumpE;
 
 // Update registers (move control signals via pipeline)
@@ -138,7 +139,7 @@ module ucsbece154b_controller (
        ResultSrcE    <=  2'b0;
        MemWriteE     <=  1'b0;
        JumpE_o       <=  1'b0;
-       BranchE       <=  1'b0;
+       BranchE_o       <=  1'b0;
        ALUControlE_o <=  3'b0;
        ALUSrcE_o     <=  1'b0;
        BranchTypeE   <=  1'b0;
@@ -147,7 +148,7 @@ module ucsbece154b_controller (
        ResultSrcE    <= ResultSrcD;
        MemWriteE     <= MemWriteD;
        JumpE_o       <= JumpD;
-       BranchE       <= BranchD;
+       BranchE_o       <= BranchD;
        ALUControlE_o <= ALUControlD;
        ALUSrcE_o     <= ALUSrcD; 
        BranchTypeE   <= BranchTypeD;

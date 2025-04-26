@@ -44,7 +44,8 @@ module ucsbece154b_datapath (
     input wire PHTincrement_i,
     input JumpE_i,
     output wire [6:0] branchop_o,
-    output wire MisspredictE_o
+    output wire MisspredictE_o,
+    input BranchE_i
 );
 
 `include "ucsbece154b_defines.vh"
@@ -78,6 +79,7 @@ assign branchop_o = InstrF_i[6:0];
 // ***** FETCH STAGE *********************************
 
 // Mux feeding to PC
+assign PCTargetE_o = (BranchTaken_e && !PHTincrement_i && BranchE_i) ? PCPlus4E : PCTargetE;
 wire [31:0] PCPlus4F = PCF_o + 32'd4;
 wire [31:0] PCTargetF = BranchTaken_i ? BTBtarget_i : PCPlus4F;
 wire [31:0] PCnewF = MisspredictE_o ? PCTargetE_o : PCTargetF;
@@ -95,7 +97,6 @@ wire [4:0] RdD;
 assign op_o       = InstrD[6:0];
 assign funct3_o   = InstrD[14:12];
 assign funct7b5_o = InstrD[30]; 
-
 assign Rs1D_o = InstrD[19:15];
 assign Rs2D_o = InstrD[24:20];
 assign RdD = InstrD[11:7];
@@ -143,7 +144,7 @@ end
 
 
 // ***** EXECUTE STAGE ******************************
-reg [31:0] RD1E, RD2E, PCPlus4E, ExtImmE, PCE; 
+reg [31:0] RD1E, RD2E, PCPlus4E, ExtImmE, PCE;
 reg [31:0] ForwardDataM;
 
 // Forwarding muxes 
@@ -189,7 +190,8 @@ ucsbece154b_alu alu (
 );
 
 // PC Target
-assign PCTargetE_o = PCE + ExtImmE;
+wire [31:0] PCTargetE;
+assign PCTargetE = PCE + ExtImmE;
 
 // Update registers
 always @ (posedge clk) begin

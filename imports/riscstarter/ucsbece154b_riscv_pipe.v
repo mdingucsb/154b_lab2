@@ -28,6 +28,7 @@ wire PHTincrement;
 wire GHRreset;
 wire JumpE;
 wire MisspredictE;
+wire BranchE;
 
 wire [31:0] BTBwritedata;
 wire BranchTaken;
@@ -63,7 +64,8 @@ assign PCF_o = PCF;
       .ResultSrcW_o (ResultSrcW),
       .ResultSrcM_o (ResultSrcM),
       .PHTincrement_o (PHTincrement),
-      .JumpE_o (JumpE)
+      .JumpE_o (JumpE),
+      .BranchE_o (BranchE)
   );
 
 
@@ -103,7 +105,8 @@ assign PCF_o = PCF;
       .PHTincrement_i (PHTincrement),
       .JumpE_i (JumpE),
       .branchop_o (branchop),
-      .MisspredictE_o (MisspredictE)
+      .MisspredictE_o (MisspredictE),
+      .BranchE_i (BranchE)
   );
 
   ucsbece154b_branch b (
