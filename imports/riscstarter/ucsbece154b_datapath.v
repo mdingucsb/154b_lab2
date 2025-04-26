@@ -285,5 +285,25 @@ always @ (posedge clk) begin
     end 
 end
 
+reg [31:0] total_JB;
+reg [31:0] correct_JB;
+reg [31:0] incorrect_JB;
+
+// branch prediction data counter
+always @(posedge clk or posedge reset) begin
+  if (reset) begin
+    total_JB <= 0;
+    correct_JB <= 0;
+    incorrect_JB <= 0;
+  end
+  if (JumpE_i | BranchE_i) begin
+    total_JB <= total_JB + 1;
+    if (MisspredictE_o)
+      incorrect_JB <= incorrect_JB + 1;
+    else
+      correct_JB <= correct_JB + 1;
+  end
+end
+
 
 endmodule
