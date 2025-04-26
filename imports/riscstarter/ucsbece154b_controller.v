@@ -131,7 +131,7 @@ module ucsbece154b_controller (
  reg BranchTypeE;
  reg [1:0] ResultSrcE;
 
- assign PHTincrement_o = BranchE & (ZeroE_i ^ BranchTypeE); // (JumpE | BranchE) & (ZeroE_i ^ BranchTypeE); 
+ assign PHTincrement_o = BranchE & (ZeroE_i ^ BranchTypeE); // basically if Branch AND is taken
 //  assign PCSrcE_o = BranchE & (PHTincrement_o) | JumpE;
 
 // Update registers (move control signals via pipeline)

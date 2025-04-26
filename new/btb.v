@@ -12,7 +12,8 @@ module btb #(
   output reg [31:0] BTBtarget_o, // f
   output reg jumphit_o, // f, stays in branch predictor
   output reg branchhit_o, // f, stays in branch predictor
-  output reg branchtaken_en // f, stays in branch predictor
+  output reg branchtaken_en, // f, stays in branch predictor
+  input PHTincrement_i // e, for BTB write condition
 );
 
   reg [24:0] Tag [NUM_BTB_ENTRIES-1:0];
@@ -78,7 +79,7 @@ module btb #(
         B[i] <= 1'b0;
       end
     end else begin
-      if (!cache_hit_e && (J_i || B_i)) begin
+      if (!cache_hit_e && (J_i || PHTincrement_i)) begin
         Tag[pc_e[6:2]] <= pc_e[31:7];
         Target[pc_e[6:2]] <= BTBwritedata_i;
         J[pc_e[6:2]] <= J_i;

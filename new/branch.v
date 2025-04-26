@@ -47,7 +47,8 @@ btb b0 (
   .BTBtarget_o(BTBtarget_internal), // F, next PC if branch predicted or jump
   .jumphit_o(jumphit), // is jump or not
   .branchhit_o(branchhit), // is branch or not
-  .branchtaken_en(branchtaken_en) // branch cannot be predicted without valid BTA
+  .branchtaken_en(branchtaken_en), // branch cannot be predicted without valid BTA
+  .PHTincrement_i(PHTincrement_i) // branch AND taken (for if statement of writing to BTB)
 );
 
 pht p0 (
