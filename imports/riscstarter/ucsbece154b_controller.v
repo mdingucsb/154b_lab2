@@ -20,9 +20,7 @@ module ucsbece154b_controller (
     input         [4:0]  RdW_i,
     output wire		 StallF_o,  
     output wire          StallD_o,
-    // output wire          FlushD_o, // FLushD = PCSrcE, legacy
     output wire    [2:0] ImmSrcD_o,
-    // output wire          PCSrcE_o, // legacy
     output reg     [2:0] ALUControlE_o,
     output reg           ALUSrcE_o,
     output wire          FlushE_o,
@@ -35,7 +33,6 @@ module ucsbece154b_controller (
     output wire PHTincrement_o,
     output reg JumpE_o
 );
-
 
  `include "ucsbece154b_defines.vh"
 
@@ -214,7 +211,6 @@ module ucsbece154b_controller (
  assign StallF_o = lwStall;
  assign StallD_o = lwStall;
  assign FlushE_o = lwStall;
-  
 
 
 endmodule

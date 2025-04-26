@@ -51,18 +51,24 @@ module ucsbece154b_datapath (
 // Define signals earleir if needed here
 
 reg [31:0] ResultW;
-wire MisspredictE;
 reg BranchTaken_d, BranchTaken_e;
+wire MisspredictE;
 assign MisspredictE = (BranchTaken_e === 1'bx) ? 1'b0 : (BranchTaken_e != (PHTincrement_i | JumpE_i));
-assign GHRreset_o = MisspredictE | FlushE_i;
+assign GHRreset_o = MisspredictE | FlushE_i; // new flushE
 
 always @(posedge clk or posedge reset) begin
   if (reset) begin
     BranchTaken_d <= 1'bx;
     BranchTaken_e <= 1'bx;
   end else begin
-    BranchTaken_d <= BranchTaken_i;
-    BranchTaken_e <= BranchTaken_d;
+    if (MisspredictE)
+      BranchTaken_d <= 1'bx;
+    else
+      BranchTaken_d <= BranchTaken_i;
+    if (GHRreset_o)
+      BranchTaken_e <= 1'bx;
+    else
+      BranchTaken_e <= BranchTaken_d;
   end
 end
 
@@ -187,7 +193,7 @@ assign PCTargetE_o = PCE + ExtImmE;
 
 // Update registers
 always @ (posedge clk) begin
-    if (reset | MisspredictE | FlushE_i) begin
+    if (reset | GHRreset_o) begin
         RD1E     <= 32'b0;
         RD2E     <= 32'b0;
         PCE      <= 32'b0;
