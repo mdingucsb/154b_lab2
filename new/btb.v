@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module btb #(
-  parameter NUM_BTB_ENTRIES = 32
+  parameter NUM_BTB_ENTRIES = 16 // NUM_BTB_ENTRIES was 32
 ) (
   input clk,
   input reset_i,
@@ -16,7 +16,9 @@ module btb #(
   input PHTincrement_i // e, for BTB write condition
 );
 
-  reg [24:0] Tag [NUM_BTB_ENTRIES-1:0];
+  localparam LOG2_BTB = $clog2(NUM_BTB_ENTRIES);
+
+  reg [31-2-LOG2_BTB:0] Tag [NUM_BTB_ENTRIES-1:0]; // 
   reg [31:0] Target [NUM_BTB_ENTRIES-1:0];
   reg        J [NUM_BTB_ENTRIES-1:0];
   reg        B [NUM_BTB_ENTRIES-1:0];
@@ -33,7 +35,7 @@ module btb #(
     cache_hit = 1'b0;
     branchtaken_en = 1'b0;
     for (i = 0; i < NUM_BTB_ENTRIES; i = i + 1) begin
-      if (pc_i[31:7] == Tag[i] && (J[pc_i[6:2]] || B[pc_i[6:2]])) begin //match tag AND index's B or J must be 1
+      if (pc_i[31:LOG2_BTB+2] == Tag[i] && (J[pc_i[LOG2_BTB+1:2]] || B[pc_i[LOG2_BTB+1:2]])) begin //match tag AND index's B or J must be 1
         cache_hit = 1'b1; 
         branchtaken_en = 1'b1; // allow possibility of branch taken prediction (since branch predict cannot predict Y without BTA)
       end
@@ -45,9 +47,9 @@ module btb #(
   always @(*) begin 
     for (i = 0; i < NUM_BTB_ENTRIES; i = i + 1) begin
       if (cache_hit) begin
-        BTBtarget_o = Target[pc_i[6:2]];
-        jumphit_o = J[pc_i[6:2]];
-        branchhit_o = B[pc_i[6:2]];
+        BTBtarget_o = Target[pc_i[LOG2_BTB+1:2]];
+        jumphit_o = J[pc_i[LOG2_BTB+1:2]];
+        branchhit_o = B[pc_i[LOG2_BTB+1:2]];
       end else begin
         BTBtarget_o = 32'b0;
         jumphit_o = 1'b0;
@@ -75,17 +77,17 @@ module btb #(
   always @(posedge clk or posedge reset_i) begin 
     if (reset_i) begin // reset
       for (i = 0; i < NUM_BTB_ENTRIES; i = i + 1) begin
-        Tag[i] <= 25'b0;
-        Target[i] <= 32'b0;
+        Tag[i] <= 0;
+        Target[i] <= 0;
         J[i] <= 1'b0;
         B[i] <= 1'b0;
       end
     end else begin
       if (BTB_write) begin
-        Tag[pc_e[6:2]] <= pc_e[31:7];
-        Target[pc_e[6:2]] <= BTBwritedata_i;
-        J[pc_e[6:2]] <= J_i;
-        B[pc_e[6:2]] <= B_i;
+        Tag[pc_e[LOG2_BTB+1:2]] <= pc_e[31:LOG2_BTB+2];
+        Target[pc_e[LOG2_BTB+1:2]] <= BTBwritedata_i;
+        J[pc_e[LOG2_BTB+1:2]] <= J_i;
+        B[pc_e[LOG2_BTB+1:2]] <= B_i;
       end
     end
   end
