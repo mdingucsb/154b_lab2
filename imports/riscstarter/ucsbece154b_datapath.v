@@ -54,6 +54,8 @@ module ucsbece154b_datapath (
 
 reg [31:0] ResultW;
 reg BranchTaken_d, BranchTaken_e;
+wire [31:0] PCTargetE;
+reg [31:0] PCPlus4E;
 assign MisspredictE_o = (BranchTaken_e === 1'bx) ? 1'b0 : (BranchTaken_e != (PHTincrement_i | JumpE_i)); // new flushD
 assign GHRreset_o = MisspredictE_o | FlushE_i; // new flushE
 
@@ -144,7 +146,7 @@ end
 
 
 // ***** EXECUTE STAGE ******************************
-reg [31:0] RD1E, RD2E, PCPlus4E, ExtImmE, PCE;
+reg [31:0] RD1E, RD2E, ExtImmE, PCE;
 reg [31:0] ForwardDataM;
 
 // Forwarding muxes 
@@ -190,7 +192,6 @@ ucsbece154b_alu alu (
 );
 
 // PC Target
-wire [31:0] PCTargetE;
 assign PCTargetE = PCE + ExtImmE;
 
 // Update registers
