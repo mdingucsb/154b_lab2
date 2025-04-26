@@ -5,9 +5,7 @@
 
 
 module ucsbece154b_branch #(
-  parameter NUM_BTB_ENTRIES = 32,
-  parameter NUM_GHR_BITS    = 5,
-  parameter NUM_PHT_ENTRIES = 32
+  parameter NUM_GHR_BITS    = 5
 ) (
   input               clk, // X
   input               reset_i, // X
@@ -87,27 +85,26 @@ always @(posedge clk or posedge reset_i) begin
 end
 
 // misc. regs
-always @(posedge clk or posedge reset_i) begin
+always @(posedge clk or posedge reset_i or posedge MisspredictE_i or posedge GHRreset_i) begin
   if (reset_i) begin
     B_d <= 1'b0;
     B_e <= 1'b0;
     J_d <= 1'b0;
     J_e <= 1'b0;
-  end else begin
-    if (MisspredictE_i) begin
-      B_d <= 1'b0;
-      J_d <= 1'b0;
-    end else begin
-      B_d <= B_type;
-      J_d <= J_type;
-    end
-    if (GHRreset_i) begin
-      B_e <= 1'b0;
-      J_e <= 1'b0;
-    end else begin
-      B_e <= B_d;
-      J_e <= J_d;
-    end
+  end
+  else if (MisspredictE_i) begin
+    B_d <= 1'b0;
+    J_d <= 1'b0;
+  end
+  else if (GHRreset_i) begin
+    B_e <= 1'b0;
+    J_e <= 1'b0;
+  end
+  else begin
+    B_d <= B_type;
+    J_d <= J_type;
+    B_e <= B_d;
+    J_e <= J_d;
   end
 end
 

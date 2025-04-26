@@ -295,8 +295,7 @@ always @(posedge clk or posedge reset) begin
     total_JB <= 0;
     correct_JB <= 0;
     incorrect_JB <= 0;
-  end
-  if (JumpE_i | BranchE_i) begin
+  end else if (JumpE_i | BranchE_i) begin
     total_JB <= total_JB + 1;
     if (MisspredictE_o)
       incorrect_JB <= incorrect_JB + 1;
