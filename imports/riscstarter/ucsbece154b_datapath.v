@@ -81,10 +81,10 @@ assign branchop_o = InstrF_i[6:0];
 // ***** FETCH STAGE *********************************
 
 // Mux feeding to PC
-assign PCTargetE_o = (BranchTaken_e && !PHTincrement_i && BranchE_i) ? PCPlus4E : PCTargetE;
+assign PCTargetE = (BranchTaken_e && !PHTincrement_i && BranchE_i) ? PCPlus4E : PCTargetE_o;
 wire [31:0] PCPlus4F = PCF_o + 32'd4;
 wire [31:0] PCTargetF = BranchTaken_i ? BTBtarget_i : PCPlus4F;
-wire [31:0] PCnewF = MisspredictE_o ? PCTargetE_o : PCTargetF;
+wire [31:0] PCnewF = MisspredictE_o ? PCTargetE : PCTargetF;
 
 // Update registers
 always @ (posedge clk) begin
@@ -192,7 +192,7 @@ ucsbece154b_alu alu (
 );
 
 // PC Target
-assign PCTargetE = PCE + ExtImmE;
+assign PCTargetE_o = PCE + ExtImmE;
 
 // Update registers
 always @ (posedge clk) begin
