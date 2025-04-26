@@ -25,6 +25,7 @@ module btb #(
   reg [31:0] pc_e; // e stage pc, used for BTA
   reg        cache_hit_d;
   reg        cache_hit_e;
+  reg        BTB_write;
   integer i;
 
   // determine if cache hit, if not force predict not taken (since no BTA ready)
@@ -37,6 +38,7 @@ module btb #(
         branchtaken_en = 1'b1; // allow possibility of branch taken prediction (since branch predict cannot predict Y without BTA)
       end
     end
+    BTB_write = (!cache_hit_e && (J_i || PHTincrement_i));
   end
 
   // if cache hit, async read
@@ -79,7 +81,7 @@ module btb #(
         B[i] <= 1'b0;
       end
     end else begin
-      if (!cache_hit_e && (J_i || PHTincrement_i)) begin
+      if (BTB_write) begin
         Tag[pc_e[6:2]] <= pc_e[31:7];
         Target[pc_e[6:2]] <= BTBwritedata_i;
         J[pc_e[6:2]] <= J_i;

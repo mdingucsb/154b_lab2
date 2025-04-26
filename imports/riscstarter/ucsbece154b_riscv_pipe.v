@@ -27,6 +27,7 @@ wire [4:0] Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW;
 wire PHTincrement;
 wire GHRreset;
 wire JumpE;
+wire MisspredictE;
 
 wire [31:0] BTBwritedata;
 wire BranchTaken;
@@ -101,7 +102,8 @@ assign PCF_o = PCF;
       .GHRreset_o (GHRreset),
       .PHTincrement_i (PHTincrement),
       .JumpE_i (JumpE),
-      .branchop_o (branchop)
+      .branchop_o (branchop),
+      .MisspredictE_o (MisspredictE)
   );
 
   ucsbece154b_branch b (
@@ -112,7 +114,8 @@ assign PCF_o = PCF;
     .BranchTaken_o (BranchTaken),
     .branchop_i (branchop),
     .PHTincrement_i (PHTincrement),
-    .GHRreset_i (GHRreset)
+    .GHRreset_i (GHRreset),
+    .MisspredictE_i (MisspredictE)
   );
 
 

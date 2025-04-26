@@ -43,7 +43,8 @@ module ucsbece154b_datapath (
     output wire GHRreset_o,
     input wire PHTincrement_i,
     input JumpE_i,
-    output wire [6:0] branchop_o
+    output wire [6:0] branchop_o,
+    output wire MisspredictE_o
 );
 
 `include "ucsbece154b_defines.vh"
@@ -52,16 +53,15 @@ module ucsbece154b_datapath (
 
 reg [31:0] ResultW;
 reg BranchTaken_d, BranchTaken_e;
-wire MisspredictE;
-assign MisspredictE = (BranchTaken_e === 1'bx) ? 1'b0 : (BranchTaken_e != (PHTincrement_i | JumpE_i));
-assign GHRreset_o = MisspredictE | FlushE_i; // new flushE
+assign MisspredictE_o = (BranchTaken_e === 1'bx) ? 1'b0 : (BranchTaken_e != (PHTincrement_i | JumpE_i)); // new flushD
+assign GHRreset_o = MisspredictE_o | FlushE_i; // new flushE
 
 always @(posedge clk or posedge reset) begin
   if (reset) begin
     BranchTaken_d <= 1'bx;
     BranchTaken_e <= 1'bx;
   end else begin
-    if (MisspredictE)
+    if (MisspredictE_o)
       BranchTaken_d <= 1'bx;
     else
       BranchTaken_d <= BranchTaken_i;
@@ -80,7 +80,7 @@ assign branchop_o = InstrF_i[6:0];
 // Mux feeding to PC
 wire [31:0] PCPlus4F = PCF_o + 32'd4;
 wire [31:0] PCTargetF = BranchTaken_i ? BTBtarget_i : PCPlus4F;
-wire [31:0] PCnewF = MisspredictE ? PCTargetE_o : PCTargetF;
+wire [31:0] PCnewF = MisspredictE_o ? PCTargetE_o : PCTargetF;
 
 // Update registers
 always @ (posedge clk) begin
@@ -130,7 +130,7 @@ end
 
 // Update registers
 always @ (posedge clk) begin
-    if (reset | MisspredictE) begin
+    if (reset | MisspredictE_o) begin
         InstrD   <= 32'b0;
         PCPlus4D <= 32'b0;
         PCD      <= 32'b0;

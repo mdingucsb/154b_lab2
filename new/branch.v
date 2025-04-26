@@ -19,7 +19,8 @@ module ucsbece154b_branch #(
   output reg          BranchTaken_o, // X
   input         [6:0] branchop_i, // X
   input               PHTincrement_i, // X 
-  input               GHRreset_i // E, either caused by branch mispredict or F or D flushed
+  input               GHRreset_i, // E, either caused by branch mispredict or F or D flushed
+  input MisspredictE_i
   // input               PHTwe_i, // replaced by B_e
   // input    [NUM_GHR_BITS-1:0]  PHTwriteaddress_i,
   // output   [NUM_GHR_BITS-1:0]  PHTreadaddress_o
@@ -93,10 +94,20 @@ always @(posedge clk or posedge reset_i) begin
     J_d <= 1'b0;
     J_e <= 1'b0;
   end else begin
-    B_d <= B_type;
-    B_e <= B_d;
-    J_d <= J_type;
-    J_e <= J_d;
+    if (MisspredictE_i) begin
+      B_d <= 1'b0;
+      J_d <= 1'b0;
+    end else begin
+      B_d <= B_type;
+      J_d <= J_type;
+    end
+    if (GHRreset_i) begin
+      B_e <= 1'b0;
+      J_e <= 1'b0;
+    end else begin
+      B_e <= B_d;
+      J_e <= J_d;
+    end
   end
 end
 
