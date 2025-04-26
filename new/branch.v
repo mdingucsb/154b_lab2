@@ -95,8 +95,12 @@ always @(posedge clk or posedge reset_i or posedge MisspredictE_i or posedge GHR
   else if (MisspredictE_i) begin
     B_d <= 1'b0;
     J_d <= 1'b0;
+    B_e <= 1'b0;
+    J_e <= 1'b0;
   end
   else if (GHRreset_i) begin
+    B_d <= B_type;
+    J_d <= J_type;
     B_e <= 1'b0;
     J_e <= 1'b0;
   end
