@@ -5,7 +5,7 @@
 
 
 module ucsbece154b_branch #(
-  parameter NUM_GHR_BITS    = 5
+  parameter NUM_GHR_BITS    = 6
 ) (
   input               clk, // X
   input               reset_i, // X
@@ -51,7 +51,7 @@ btb b0 (
 );
 
 pht #(
-  .NUM_GHR_BITS(6)
+  .NUM_GHR_BITS(NUM_GHR_BITS)
 ) p0 (
   .clk(clk),
   .reset_i(reset_i),
