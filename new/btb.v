@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module btb #(
-  parameter NUM_BTB_ENTRIES = 8 // NUM_BTB_ENTRIES was 32
+  parameter NUM_BTB_ENTRIES = 32 // NUM_BTB_ENTRIES was 32
 ) (
   input clk,
   input reset_i,

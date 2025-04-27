@@ -50,13 +50,15 @@ btb b0 (
   .PHTincrement_i(PHTincrement_i) // branch AND taken (for if statement of writing to BTB)
 );
 
-pht p0 (
+pht #(
+  .NUM_GHR_BITS(6)
+) p0 (
   .clk(clk),
   .reset_i(reset_i),
-  .PHTreadaddress_o(PHTreadaddress), // F, XORed result of pc_i[6:2], GHR
-  .PHTincrement_i(PHTincrement_i), // E, whether branch was actually taken or not
-  .B_i(B_e), // E, if PHT write address is actually a branch
-  .predict_taken(predict_taken) // F, predict taken or not for branch instructions
+  .PHTreadaddress_o(PHTreadaddress),
+  .PHTincrement_i(PHTincrement_i),
+  .B_i(B_e),
+  .predict_taken(predict_taken)
 );
 
 // misc. combo logic
@@ -72,16 +74,16 @@ always @(*) begin
     J_type = 1'b0;
   // output logic
   BranchTaken_o = branchtaken_en & ((predict_taken & branchhit) | jumphit);
-  PHTreadaddress = pc_i[6:2] ^ GHR;
+  PHTreadaddress = pc_i[NUM_GHR_BITS+1:2] ^ GHR;
   BTBtarget_o = BTBtarget_internal;
 end
 
 // GHR
 always @(posedge clk or posedge reset_i) begin
   if (reset_i || (GHRreset_i)) 
-    GHR <= 5'b00000;
+    GHR <= 0;
   else if (B_type && predict_taken)
-    GHR <= {predict_taken, GHR[4:1]};
+    GHR <= {predict_taken, GHR[NUM_GHR_BITS-1:1]};
 end
 
 // misc. regs

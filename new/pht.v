@@ -1,8 +1,7 @@
 `timescale 1ns / 1ps
 
 module pht #(
-  parameter NUM_GHR_BITS    = 5,
-  parameter NUM_PHT_ENTRIES = 32
+  parameter NUM_GHR_BITS    = 5
 ) (
   input clk,
   input reset_i,
@@ -11,6 +10,8 @@ module pht #(
   input B_i,
   output wire predict_taken
 );
+
+  localparam NUM_PHT_ENTRIES = 2 ** NUM_GHR_BITS;
 
   reg [1:0] PHT [NUM_PHT_ENTRIES-1:0];
   reg [NUM_GHR_BITS-1:0] PHTwriteaddress_d;
