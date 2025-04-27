@@ -1,11 +1,5 @@
-// ucsbece154_branch.v
-// All Rights Reserved
-// Copyright (c) 2024 UCSB ECE
-// Distribution Prohibited
-
-
 module ucsbece154b_branch #(
-  parameter NUM_GHR_BITS    = 6
+  parameter NUM_GHR_BITS    = 5
 ) (
   input               clk, // X
   input               reset_i, // X
@@ -82,12 +76,12 @@ end
 always @(posedge clk or posedge reset_i) begin
   if (reset_i || GHRreset_i)
     GHR <= 0;
-  else if (B_type)
+  else if (B_type) // better with (B_type && predict_taken)
     GHR <= {predict_taken, GHR[NUM_GHR_BITS-1:1]};
 end
 
 // misc. regs
-always @(posedge clk or posedge reset_i or posedge MisspredictE_i or posedge GHRreset_i) begin
+always @(posedge clk or posedge reset_i) begin
   if (reset_i) begin
     B_d <= 1'b0;
     B_e <= 1'b0;
