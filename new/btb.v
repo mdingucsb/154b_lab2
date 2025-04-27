@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module btb #(
-  parameter NUM_BTB_ENTRIES = 16 // NUM_BTB_ENTRIES was 32
+  parameter NUM_BTB_ENTRIES = 8 // NUM_BTB_ENTRIES was 32
 ) (
   input clk,
   input reset_i,
@@ -16,9 +16,9 @@ module btb #(
   input PHTincrement_i // e, for BTB write condition
 );
 
-  localparam LOG2_BTB = $clog2(NUM_BTB_ENTRIES);
+  localparam LOG2_BTB = $clog2(NUM_BTB_ENTRIES); // 3 for BTB8
 
-  reg [31-2-LOG2_BTB:0] Tag [NUM_BTB_ENTRIES-1:0]; // 
+  reg [31-2-LOG2_BTB:0] Tag [NUM_BTB_ENTRIES-1:0]; // 26:0, 2:0
   reg [31:0] Target [NUM_BTB_ENTRIES-1:0];
   reg        J [NUM_BTB_ENTRIES-1:0];
   reg        B [NUM_BTB_ENTRIES-1:0];
@@ -28,33 +28,57 @@ module btb #(
   reg        cache_hit_d;
   reg        cache_hit_e;
   reg        BTB_write;
+  wire [LOG2_BTB-1:0] btb_index;
+  assign btb_index = pc_i[LOG2_BTB+1:2];
   integer i;
 
+  // LOG2 + 2 = 5
+  // LOG2 + 1 = 4
+
+
   // determine if cache hit, if not force predict not taken (since no BTA ready)
+  // always @(*) begin 
+  //   cache_hit = 1'b0;
+  //   branchtaken_en = 1'b0;
+  //   for (i = 0; i < NUM_BTB_ENTRIES; i = i + 1) begin
+  //     if (pc_i[31:LOG2_BTB+2] == Tag[i] && (J[i] || B[i])) begin // (pc_i[31:LOG2_BTB+2] == Tag[i] && (J[pc_i[LOG2_BTB+1:2]] || B[pc_i[LOG2_BTB+1:2]])) begin //match tag AND index's B or J must be 1
+  //       cache_hit = 1'b1; 
+  //       branchtaken_en = 1'b1; // allow possibility of branch taken prediction (since branch predict cannot predict Y without BTA)
+  //     end
+  //   end
+  //   // BTB_write = (!cache_hit_e && (J_i || PHTincrement_i));
+  // end
   always @(*) begin 
-    cache_hit = 1'b0;
-    branchtaken_en = 1'b0;
-    for (i = 0; i < NUM_BTB_ENTRIES; i = i + 1) begin
-      if (pc_i[31:LOG2_BTB+2] == Tag[i] && (J[pc_i[LOG2_BTB+1:2]] || B[pc_i[LOG2_BTB+1:2]])) begin //match tag AND index's B or J must be 1
-        cache_hit = 1'b1; 
-        branchtaken_en = 1'b1; // allow possibility of branch taken prediction (since branch predict cannot predict Y without BTA)
-      end
+    if ((Tag[btb_index] == pc_i[31:LOG2_BTB+2]) && (J[btb_index] || B[btb_index])) begin
+      cache_hit = 1'b1; 
+      branchtaken_en = 1'b1;
+    end else begin
+      cache_hit = 1'b0;
+      branchtaken_en = 1'b0;
     end
     BTB_write = (!cache_hit_e && (J_i || PHTincrement_i));
   end
 
+  // reg BTB_write_r;
+  // always @(posedge clk or posedge reset_i) begin
+  //   if (reset_i) begin
+  //     BTB_write_r <= 1'b0;
+  //   end else begin
+  //     BTB_write_r <= (!cache_hit_e && (J_i || PHTincrement_i));
+  //   end
+  // end
+
+
   // if cache hit, async read
-  always @(*) begin 
-    for (i = 0; i < NUM_BTB_ENTRIES; i = i + 1) begin
-      if (cache_hit) begin
-        BTBtarget_o = Target[pc_i[LOG2_BTB+1:2]];
-        jumphit_o = J[pc_i[LOG2_BTB+1:2]];
-        branchhit_o = B[pc_i[LOG2_BTB+1:2]];
-      end else begin
-        BTBtarget_o = 32'b0;
-        jumphit_o = 1'b0;
-        branchhit_o = 1'b0;
-      end
+  always @(*) begin
+    if (cache_hit) begin
+      BTBtarget_o = Target[btb_index];
+      jumphit_o   = J[btb_index];
+      branchhit_o = B[btb_index];
+    end else begin
+      BTBtarget_o = 32'b0;
+      jumphit_o   = 1'b0;
+      branchhit_o = 1'b0;
     end
   end
 
