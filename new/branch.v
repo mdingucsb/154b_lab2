@@ -80,10 +80,10 @@ end
 
 // GHR
 always @(posedge clk or posedge reset_i) begin
-  if (reset_i || (GHRreset_i)) 
+  if (reset_i || GHRreset_i)
     GHR <= 0;
-  else if (B_type && predict_taken)
-    GHR <= {predict_taken, GHR[NUM_GHR_BITS-2:1]};
+  else if (B_type)
+    GHR <= {predict_taken, GHR[NUM_GHR_BITS-1:1]};
 end
 
 // misc. regs
